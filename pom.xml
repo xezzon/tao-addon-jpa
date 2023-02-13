@@ -4,9 +4,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>indi.xezzon</groupId>
+    <groupId>io.github.xezzon</groupId>
     <artifactId>tao</artifactId>
-    <version>0.7.2</version>
+    <version>0.8.0</version>
   </parent>
   <artifactId>tao-addon-jpa</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -24,9 +24,9 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>indi.xezzon</groupId>
+        <groupId>io.github.xezzon</groupId>
         <artifactId>tao-bom</artifactId>
-        <version>0.7.2</version>
+        <version>0.8.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -49,7 +49,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>indi.xezzon</groupId>
+      <groupId>io.github.xezzon</groupId>
       <artifactId>tao-core</artifactId>
     </dependency>
     <dependency>
@@ -67,17 +67,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <distributionManagement>
-    <snapshotRepository>
-      <id>coding</id>
-      <name>coding</name>
-      <url>https://xezzo-maven.pkg.coding.net/repository/tao/central/</url>
-    </snapshotRepository>
-    <repository>
-      <id>github</id>
-      <name>github</name>
-      <url>https://maven.pkg.github.com/xezzon/tao</url>
-    </repository>
-  </distributionManagement>
 </project>

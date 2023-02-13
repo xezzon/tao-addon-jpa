@@ -1,4 +1,4 @@
-package indi.xezzon.tao.jpa;
+package io.github.xezzon.tao.jpa;
 
 import cn.hutool.core.util.ReflectUtil;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -6,7 +6,7 @@ import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAUpdateClause;
-import indi.xezzon.tao.retrieval.CommonQuery;
+import io.github.xezzon.tao.retrieval.CommonQuery;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import javax.annotation.Resource;
