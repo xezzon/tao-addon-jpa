@@ -131,14 +131,9 @@ under the License.
     </server>
     -->
     <server>
-      <id>coding</id>
-      <username>${env.CODING_ARTIFACTS_USERNAME}</username>
-      <password>${env.CODING_ARTIFACTS_PASSWORD}</password>
-    </server>
-    <server>
-      <id>github</id>
-      <username>${env.GITHUB_ARTIFACTS_USERNAME}</username>
-      <password>${env.GITHUB_ARTIFACTS_PASSWORD}</password>
+      <id>ossrh</id>
+      <username>${env.OSSRH_ID}</username>
+      <password>${env.OSSRH_PWD}</password>
     </server>
   </servers>
 
@@ -261,25 +256,6 @@ under the License.
       </properties>
     </profile>
     -->
-    <profile>
-      <id>Repository Proxy</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <repositories>
-        <repository>
-          <id>github</id>
-          <name>github</name>
-          <url>https://maven.pkg.github.com/xezzon/tao</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </repository>
-      </repositories>
-    </profile>
   </profiles>
 
   <!-- activeProfiles

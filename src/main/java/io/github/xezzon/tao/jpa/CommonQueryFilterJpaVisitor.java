@@ -1,8 +1,8 @@
-package indi.xezzon.tao.jpa;
+package io.github.xezzon.tao.jpa;
 
-import static indi.xezzon.tao.retrieval.CommonQuery.nonexistentField;
-import static indi.xezzon.tao.retrieval.CommonQuery.unsupportedOperator;
-import static indi.xezzon.tao.retrieval.CommonQuery.uoe;
+import static io.github.xezzon.tao.retrieval.CommonQuery.nonexistentField;
+import static io.github.xezzon.tao.retrieval.CommonQuery.unsupportedOperator;
+import static io.github.xezzon.tao.retrieval.CommonQuery.uoe;
 
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -16,12 +16,12 @@ import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.core.types.dsl.TimePath;
-import indi.xezzon.tao.retrieval.CommonQueryFilterBaseVisitor;
-import indi.xezzon.tao.retrieval.CommonQueryFilterParser.AndLogicContext;
-import indi.xezzon.tao.retrieval.CommonQueryFilterParser.OrLogicContext;
-import indi.xezzon.tao.retrieval.CommonQueryFilterParser.ParenthesisContext;
-import indi.xezzon.tao.retrieval.CommonQueryFilterParser.PredicateContext;
-import indi.xezzon.tao.retrieval.FilterOperatorEnum;
+import io.github.xezzon.tao.retrieval.CommonQueryFilterBaseVisitor;
+import io.github.xezzon.tao.retrieval.CommonQueryFilterParser.AndLogicContext;
+import io.github.xezzon.tao.retrieval.CommonQueryFilterParser.OrLogicContext;
+import io.github.xezzon.tao.retrieval.CommonQueryFilterParser.ParenthesisContext;
+import io.github.xezzon.tao.retrieval.CommonQueryFilterParser.PredicateContext;
+import io.github.xezzon.tao.retrieval.FilterOperatorEnum;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
