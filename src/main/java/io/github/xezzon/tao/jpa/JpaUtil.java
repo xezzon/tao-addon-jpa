@@ -12,6 +12,7 @@ import io.github.xezzon.tao.retrieval.CommonQuery;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -20,9 +21,10 @@ import javax.persistence.Column;
 import javax.persistence.Version;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 
 /**
  * @author xezzon
@@ -84,20 +86,17 @@ public class JpaUtil {
   }
 
   public static Pageable getPageable(CommonQuery commonQuery) {
-    Pageable pageable = commonQuery.getPageSize() > 0
-        ? Pageable.ofSize(commonQuery.getPageSize()).withPage(commonQuery.getPageNum() - 1)
-        : Pageable.unpaged();
-    commonQuery.parseSort()
-        .forEach(sorter -> pageable.getSort()
-            .and(Sort.by(
-                switch (sorter.getDirection()) {
-                  case ASC -> Direction.ASC;
-                  case DESC -> Direction.DESC;
-                },
-                sorter.getField()
-            ))
-        );
-    return pageable;
+    if (commonQuery.getPageSize() <= 0) {
+      return Pageable.unpaged();
+    }
+    List<Order> orders = commonQuery.parseSort().parallelStream()
+        .map(sorter -> switch (sorter.getDirection()) {
+          case ASC -> Order.asc(sorter.getField());
+          case DESC -> Order.desc(sorter.getField());
+        })
+        .toList();
+    Sort sort = Sort.by(orders);
+    return PageRequest.of(commonQuery.getPageNum() - 1, commonQuery.getPageSize(), sort);
   }
 }
 
