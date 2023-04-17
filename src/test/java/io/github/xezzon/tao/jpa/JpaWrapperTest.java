@@ -2,6 +2,7 @@ package io.github.xezzon.tao.jpa;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
+import io.github.xezzon.tao.retrieval.CommonQuery;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,9 +13,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Component;
@@ -53,7 +56,9 @@ class JpaWrapperTest {
    */
   @Test
   void query_unpaged() {
-
+    Page<User> users = userDAO.query(new CommonQuery());
+    Assertions.assertEquals(UserDataset.getDataset().size(), users.getTotalElements());
+    Assertions.assertEquals(UserDataset.getDataset().size(), users.getContent().size());
   }
 
   /**
