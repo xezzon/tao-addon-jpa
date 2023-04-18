@@ -232,7 +232,79 @@ class JpaWrapperTest {
 
   @Test
   void query_number() {
+    String exceptNumber = "0.180e2";
 
+    CommonQuery eqQuery = new CommonQuery();
+    eqQuery.setFilter(String.format("age EQ %s", exceptNumber));
+    Page<User> eqPage = userDAO.query(eqQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.equals(user.getAge(), 18))
+            .count(),
+        eqPage.getTotalElements()
+    );
+
+    CommonQuery neQuery = new CommonQuery();
+    neQuery.setFilter(String.format("age NE %s", exceptNumber));
+    Page<User> nePage = userDAO.query(neQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> !Objects.equals(user.getAge(), 18))
+            .count(),
+        nePage.getTotalElements()
+    );
+    Assertions.assertEquals(
+        UserDataset.getDataset().size(),
+        eqPage.getTotalElements() + nePage.getTotalElements()
+    );
+
+    CommonQuery gtQuery = new CommonQuery();
+    gtQuery.setFilter(String.format("age GT %s", exceptNumber));
+    Page<User> gtPage = userDAO.query(gtQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> user.getAge() > 18)
+            .count(),
+        gtPage.getTotalElements()
+    );
+
+    CommonQuery ltQuery = new CommonQuery();
+    ltQuery.setFilter(String.format("age LT %s", exceptNumber));
+    Page<User> ltPage = userDAO.query(ltQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> user.getAge() < 18)
+            .count(),
+        ltPage.getTotalElements()
+    );
+
+    CommonQuery geQuery = new CommonQuery();
+    geQuery.setFilter(String.format("age GE %s", exceptNumber));
+    Page<User> gePage = userDAO.query(geQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> user.getAge() >= 18)
+            .count(),
+        gePage.getTotalElements()
+    );
+    Assertions.assertEquals(
+        UserDataset.getDataset().size(),
+        gePage.getTotalElements() + ltPage.getTotalElements()
+    );
+
+    CommonQuery leQuery = new CommonQuery();
+    leQuery.setFilter(String.format("age LE %s", exceptNumber));
+    Page<User> lePage = userDAO.query(leQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> user.getAge() <= 18)
+            .count(),
+        lePage.getTotalElements()
+    );
+    Assertions.assertEquals(
+        UserDataset.getDataset().size(),
+        lePage.getTotalElements() + gtPage.getTotalElements()
+    );
   }
 
   @Test
