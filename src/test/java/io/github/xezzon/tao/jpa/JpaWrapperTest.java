@@ -5,7 +5,9 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.xezzon.tao.retrieval.CommonQuery;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -55,11 +57,11 @@ class JpaWrapperTest {
    */
   @Test
   void query() {
-    String condition = "(name LLIKE 'J' OR (age GT 18)) AND (gender IN 'MALE' OR deleteTime NULL true)";
+    String condition = "(name LLIKE 'J' OR (age GT 18)) AND (gender IN 'MALE' OR deleteDateTime NULL true)";
     List<User> excepts = UserDataset.getDataset().parallelStream()
         .filter(user -> user.getName().startsWith("J") || user.getAge() > 18)
         .filter(user -> Objects.equals(GenderEnum.MALE, user.getGender())
-            || user.getDeleteTime() == null)
+            || user.getDeleteDateTime() == null)
         .sorted(Comparator.comparing(User::getCredit))
         .toList();
     int pageSize = 15;
@@ -309,7 +311,92 @@ class JpaWrapperTest {
 
   @Test
   void query_datetime() {
+    // yyyy-MM-ddTHH:mm:ss
+    LocalDateTime exceptDateTime = UserDataset.getDataset().parallelStream()
+        .filter(user -> Objects.nonNull(user.getDeleteDateTime()))
+        .findAny()
+        .get().getDeleteDateTime();
 
+    CommonQuery eqQuery = new CommonQuery();
+    eqQuery.setFilter(String.format(
+        "deleteDateTime NULL false AND deleteDateTime EQ '%s'",
+        exceptDateTime
+    ));
+    Page<User> eqPage = userDAO.query(eqQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteDateTime()))
+            .filter(user -> Objects.equals(user.getDeleteDateTime(), exceptDateTime))
+            .count(),
+        eqPage.getTotalElements()
+    );
+
+    CommonQuery neQuery = new CommonQuery();
+    neQuery.setFilter(String.format(
+        "deleteDateTime NULL false AND deleteDateTime NE '%s'",
+        exceptDateTime
+    ));
+    Page<User> nePage = userDAO.query(neQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteDateTime()))
+            .filter(user -> !Objects.equals(user.getDeleteDateTime(), exceptDateTime))
+            .count(),
+        nePage.getTotalElements()
+    );
+
+    CommonQuery gtQuery = new CommonQuery();
+    gtQuery.setFilter(String.format(
+        "deleteDateTime NULL false AND deleteDateTime GT '%s'",
+        exceptDateTime
+    ));
+    Page<User> gtPage = userDAO.query(gtQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteDateTime()))
+            .filter(user -> user.getDeleteDateTime().isAfter(exceptDateTime))
+            .count(),
+        gtPage.getTotalElements()
+    );
+
+    CommonQuery ltQuery = new CommonQuery();
+    ltQuery.setFilter(String.format(
+        "deleteDateTime NULL false AND deleteDateTime LT '%s'", exceptDateTime
+    ));
+    Page<User> ltPage = userDAO.query(ltQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteDateTime()))
+            .filter(user -> user.getDeleteDateTime().isBefore(exceptDateTime))
+            .count(),
+        ltPage.getTotalElements()
+    );
+
+    CommonQuery geQuery = new CommonQuery();
+    geQuery.setFilter(String.format(
+        "deleteDateTime NULL false AND deleteDateTime GE '%s'", exceptDateTime
+    ));
+    Page<User> gePage = userDAO.query(geQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteDateTime()))
+            .filter(user -> !user.getDeleteDateTime().isBefore(exceptDateTime))
+            .count(),
+        gePage.getTotalElements()
+    );
+
+    CommonQuery leQuery = new CommonQuery();
+    leQuery.setFilter(String.format(
+        "deleteDateTime NULL false AND deleteDateTime LE '%s'", exceptDateTime
+    ));
+    Page<User> lePage = userDAO.query(leQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteDateTime()))
+            .filter(user -> !user.getDeleteDateTime().isAfter(exceptDateTime))
+            .count(),
+        lePage.getTotalElements()
+    );
   }
 
   @Test
@@ -369,9 +456,13 @@ class User {
   @Column
   private GenderEnum gender;
   @Column
-  private LocalDateTime deleteTime;
+  private LocalDateTime deleteDateTime;
   @Column
   private Boolean deleted;
+  @Column
+  private LocalDate deleteDate;
+  @Column
+  private LocalTime deleteTime;
 
   @Override
   public boolean equals(Object o) {
@@ -411,7 +502,7 @@ class UserDataset extends AbstractDataset<User> {
       user.setAge(RandomUtil.randomInt(6, 60));
       user.setCredit(RandomUtil.randomBigDecimal(new BigDecimal("100.000")));
       user.setGender(RandomUtil.randomEle(GenderEnum.values()));
-      user.setDeleteTime(RandomUtil.randomBoolean() ?
+      user.setDeleteDateTime(RandomUtil.randomBoolean() ?
           LocalDateTime.of(
               RandomUtil.randomInt(2000, 2999),
               RandomUtil.randomInt(1, 11),
@@ -421,7 +512,17 @@ class UserDataset extends AbstractDataset<User> {
               RandomUtil.randomInt(1, 59)
           ) : null
       );
-      user.setDeleted(user.getDeleteTime() != null);
+      user.setDeleted(user.getDeleteDateTime() != null);
+      user.setDeleteDate(
+          user.getDeleteDateTime() == null
+              ? null
+              : user.getDeleteDateTime().toLocalDate()
+      );
+      user.setDeleteTime(
+          user.getDeleteDateTime() == null
+              ? null
+              : user.getDeleteDateTime().toLocalTime()
+      );
       DATASET.add(user);
     }
   }
