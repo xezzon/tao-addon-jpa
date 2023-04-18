@@ -190,7 +190,44 @@ class JpaWrapperTest {
 
   @Test
   void query_enum() {
+    CommonQuery inQuery = new CommonQuery();
+    inQuery.setFilter("gender IN 'MALE,FEMALE'");
+    Page<User> inPage = userDAO.query(inQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Set.of(GenderEnum.MALE, GenderEnum.FEMALE).contains(user.getGender()))
+            .count(),
+        inPage.getTotalElements()
+    );
 
+    CommonQuery outQuery = new CommonQuery();
+    outQuery.setFilter("gender OUT 'MALE,FEMALE'");
+    Page<User> outPage = userDAO.query(outQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> !Set.of(GenderEnum.MALE, GenderEnum.FEMALE).contains(user.getGender()))
+            .count(),
+        outPage.getTotalElements()
+    );
+    Assertions.assertEquals(
+        UserDataset.getDataset().size(),
+        inPage.getTotalElements() + outPage.getTotalElements()
+    );
+
+    CommonQuery allQuery = new CommonQuery();
+    allQuery.setFilter("gender IN 'MALE,FEMALE,UNKNOWN'");
+    Page<User> allPage = userDAO.query(allQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().size(),
+        allPage.getTotalElements()
+    );
+
+    CommonQuery emptyQuery = new CommonQuery();
+    emptyQuery.setFilter("gender IN ''");
+    Assertions.assertThrowsExactly(
+        UnsupportedOperationException.class,
+        () -> userDAO.query(emptyQuery)
+    );
   }
 
   @Test
@@ -261,6 +298,7 @@ class User {
 enum GenderEnum {
   MALE,
   FEMALE,
+  UNKNOWN,
   ;
 }
 
