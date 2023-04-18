@@ -654,7 +654,7 @@ class User {
   private String name;
   @Column
   private Integer age;
-  @Column(scale = 9)
+  @Column(precision = 13, scale = 9)
   private BigDecimal credit;
   @Column(updatable = false)
   private GenderEnum gender;
