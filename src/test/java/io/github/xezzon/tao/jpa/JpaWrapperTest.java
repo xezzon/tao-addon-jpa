@@ -32,6 +32,7 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author xezzon
@@ -44,12 +45,44 @@ class JpaWrapperTest {
   private UserDAO userDAO;
 
   @Test
+  @Transactional
   void update() {
+    User user = UserDataset.getDataset().parallelStream()
+        .filter(o -> Objects.nonNull(o.getDeleteDateTime()))
+        .filter(o -> !Objects.equals(o.getGender(), GenderEnum.UNKNOWN))
+        .findAny().get();
+    User newUser = new User();
+    newUser.setId(user.getId());
+    newUser.setName(RandomUtil.randomString(8));
+    newUser.setGender(GenderEnum.UNKNOWN);
+    newUser.setAge(100);
+    newUser.setCredit(null);
+    newUser.setDeleteDateTime(LocalDateTime.now());
+    userDAO.update(newUser);
+    User updatedUser = userDAO.get().getReferenceById(user.getId());
     // 普通字段正常更新
-
+    Assertions.assertEquals(
+        newUser.getName(),
+        updatedUser.getName()
+    );
+    Assertions.assertEquals(
+        newUser.getAge(),
+        updatedUser.getAge()
+    );
     // 值为 NULL 的字段不更新
-
+    Assertions.assertTrue(
+        user.getCredit().subtract(updatedUser.getCredit()).abs()
+            .compareTo(new BigDecimal("0.01")) < 1
+    );
+    Assertions.assertEquals(
+        user.getDeleted(),
+        updatedUser.getDeleted()
+    );
     // updatable 属性为 false 的属性不更新
+    Assertions.assertEquals(
+        user.getGender(),
+        updatedUser.getGender()
+    );
   }
 
   /**
@@ -617,13 +650,13 @@ class User {
   @Id
   @Column
   private String id;
-  @Column
+  @Column(nullable = false)
   private String name;
   @Column
   private Integer age;
   @Column(scale = 9)
   private BigDecimal credit;
-  @Column
+  @Column(updatable = false)
   private GenderEnum gender;
   @Column
   private LocalDateTime deleteDateTime;
