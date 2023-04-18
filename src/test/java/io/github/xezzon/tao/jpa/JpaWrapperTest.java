@@ -2,6 +2,7 @@ package io.github.xezzon.tao.jpa;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import io.github.xezzon.tao.retrieval.CommonQuery;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,6 +11,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -100,7 +103,89 @@ class JpaWrapperTest {
 
   @Test
   void query_string() {
+    CommonQuery eqQuery = new CommonQuery();
+    String exceptName = UserDataset.getDataset().parallelStream()
+        .map(User::getName)
+        .findAny()
+        .get();
+    eqQuery.setFilter(String.format("name EQ '%s'", exceptName));
+    Page<User> eqPage = userDAO.query(eqQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.equals(user.getName(), exceptName))
+            .count(),
+        eqPage.getTotalElements()
+    );
 
+    CommonQuery neQuery = new CommonQuery();
+    neQuery.setFilter(String.format("name NE '%s'", exceptName));
+    Page<User> nePage = userDAO.query(neQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> !Objects.equals(user.getName(), exceptName))
+            .count(),
+        nePage.getTotalElements()
+    );
+    Assertions.assertEquals(
+        UserDataset.getDataset().size(),
+        eqPage.getTotalElements() + nePage.getTotalElements()
+    );
+
+    CommonQuery llikeQuery = new CommonQuery();
+    llikeQuery.setFilter(String.format("name LLIKE '%s'", exceptName.substring(0, 3)));
+    Page<User> llikePage = userDAO.query(llikeQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> user.getName().startsWith(exceptName.substring(0, 3)))
+            .count(),
+        llikePage.getTotalElements()
+    );
+
+    Set<String> exceptId = UserDataset.getDataset().parallelStream()
+        .limit(10)
+        .map(User::getId)
+        .collect(Collectors.toSet());
+    CommonQuery inQuery = new CommonQuery();
+    inQuery.setFilter(String.format("id IN '%s'", StrUtil.join(",", exceptId)));
+    Page<User> inPage = userDAO.query(inQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> exceptId.contains(user.getId()))
+            .count(),
+        inPage.getTotalElements()
+    );
+
+    CommonQuery outQuery = new CommonQuery();
+    outQuery.setFilter(String.format("id OUT '%s'", StrUtil.join(",", exceptId)));
+    Page<User> outPage = userDAO.query(outQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> !exceptId.contains(user.getId()))
+            .count(),
+        outPage.getTotalElements()
+    );
+    Assertions.assertEquals(
+        UserDataset.getDataset().size(),
+        inPage.getTotalElements() + outPage.getTotalElements()
+    );
+
+    CommonQuery emptyInQuery1 = new CommonQuery();
+    emptyInQuery1.setFilter("name IN ''");
+    Page<User> emptyInPage1 = userDAO.query(emptyInQuery1);
+    Assertions.assertEquals(
+        0,
+        emptyInPage1.getTotalElements()
+    );
+
+    CommonQuery emptyInQuery2 = new CommonQuery();
+    emptyInQuery2.setFilter(String.format("name IN ',%s, ,'", exceptName));
+    Page<User> emptyInPage2 = userDAO.query(emptyInQuery2);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.equals(user.getName(), exceptName))
+            .count(),
+        emptyInPage2.getTotalElements()
+    );
   }
 
   @Test
@@ -130,11 +215,6 @@ class JpaWrapperTest {
 
   @Test
   void query_boolean() {
-
-  }
-
-  @Test
-  void query_in_empty() {
 
   }
 }
