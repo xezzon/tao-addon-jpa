@@ -491,7 +491,92 @@ class JpaWrapperTest {
 
   @Test
   void query_time() {
+    // HH:mm:ss
+    LocalTime exceptTime = UserDataset.getDataset().parallelStream()
+        .filter(user -> Objects.nonNull(user.getDeleteTime()))
+        .findAny()
+        .get().getDeleteTime();
 
+    CommonQuery eqQuery = new CommonQuery();
+    eqQuery.setFilter(String.format(
+        "deleteTime NULL false AND deleteTime EQ '%s'",
+        exceptTime
+    ));
+    Page<User> eqPage = userDAO.query(eqQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteTime()))
+            .filter(user -> Objects.equals(user.getDeleteTime(), exceptTime))
+            .count(),
+        eqPage.getTotalElements()
+    );
+
+    CommonQuery neQuery = new CommonQuery();
+    neQuery.setFilter(String.format(
+        "deleteTime NULL false AND deleteTime NE '%s'",
+        exceptTime
+    ));
+    Page<User> nePage = userDAO.query(neQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteTime()))
+            .filter(user -> !Objects.equals(user.getDeleteTime(), exceptTime))
+            .count(),
+        nePage.getTotalElements()
+    );
+
+    CommonQuery gtQuery = new CommonQuery();
+    gtQuery.setFilter(String.format(
+        "deleteTime NULL false AND deleteTime GT '%s'",
+        exceptTime
+    ));
+    Page<User> gtPage = userDAO.query(gtQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteTime()))
+            .filter(user -> user.getDeleteTime().isAfter(exceptTime))
+            .count(),
+        gtPage.getTotalElements()
+    );
+
+    CommonQuery ltQuery = new CommonQuery();
+    ltQuery.setFilter(String.format(
+        "deleteTime NULL false AND deleteTime LT '%s'", exceptTime
+    ));
+    Page<User> ltPage = userDAO.query(ltQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteTime()))
+            .filter(user -> user.getDeleteTime().isBefore(exceptTime))
+            .count(),
+        ltPage.getTotalElements()
+    );
+
+    CommonQuery geQuery = new CommonQuery();
+    geQuery.setFilter(String.format(
+        "deleteTime NULL false AND deleteTime GE '%s'", exceptTime
+    ));
+    Page<User> gePage = userDAO.query(geQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteTime()))
+            .filter(user -> !user.getDeleteTime().isBefore(exceptTime))
+            .count(),
+        gePage.getTotalElements()
+    );
+
+    CommonQuery leQuery = new CommonQuery();
+    leQuery.setFilter(String.format(
+        "deleteTime NULL false AND deleteTime LE '%s'", exceptTime
+    ));
+    Page<User> lePage = userDAO.query(leQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.nonNull(user.getDeleteTime()))
+            .filter(user -> !user.getDeleteTime().isAfter(exceptTime))
+            .count(),
+        lePage.getTotalElements()
+    );
   }
 
   @Test
