@@ -252,7 +252,29 @@ class JpaWrapperTest {
 
   @Test
   void query_boolean() {
+    CommonQuery eqQuery = new CommonQuery();
+    eqQuery.setFilter("deleted EQ true");
+    Page<User> eqPage = userDAO.query(eqQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> Objects.equals(user.getDeleted(), true))
+            .count(),
+        eqPage.getTotalElements()
+    );
 
+    CommonQuery neQuery = new CommonQuery();
+    neQuery.setFilter("deleted NE false");
+    Page<User> nePage = userDAO.query(neQuery);
+    Assertions.assertEquals(
+        UserDataset.getDataset().parallelStream()
+            .filter(user -> !Objects.equals(user.getDeleted(), false))
+            .count(),
+        nePage.getTotalElements()
+    );
+    Assertions.assertEquals(
+        eqPage.getTotalElements(),
+        nePage.getTotalElements()
+    );
   }
 }
 
@@ -276,6 +298,8 @@ class User {
   private GenderEnum gender;
   @Column
   private LocalDateTime deleteTime;
+  @Column
+  private Boolean deleted;
 
   @Override
   public boolean equals(Object o) {
@@ -325,6 +349,7 @@ class UserDataset extends AbstractDataset<User> {
               RandomUtil.randomInt(1, 59)
           ) : null
       );
+      user.setDeleted(user.getDeleteTime() != null);
       DATASET.add(user);
     }
   }
