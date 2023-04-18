@@ -90,7 +90,12 @@ class JpaWrapperTest {
    */
   @Test
   void query_unknown_field() {
-
+    CommonQuery commonQuery = new CommonQuery();
+    commonQuery.setFilter("field EQ 'value'");
+    Assertions.assertThrowsExactly(
+        UnsupportedOperationException.class,
+        () -> userDAO.query(commonQuery)
+    );
   }
 
   @Test
