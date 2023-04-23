@@ -17,7 +17,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  */
 @MappedSuperclass
 @EntityListeners({AuditingEntityListener.class})
-public abstract class BaseEntity implements Serializable {
+public abstract class BaseEntity implements Serializable, LogicDelete {
 
   @java.io.Serial
   private static final long serialVersionUID = 4129917285621615159L;
@@ -73,6 +73,7 @@ public abstract class BaseEntity implements Serializable {
     return this;
   }
 
+  @Override
   public LocalDateTime getDeleteTime() {
     return deleteTime;
   }
