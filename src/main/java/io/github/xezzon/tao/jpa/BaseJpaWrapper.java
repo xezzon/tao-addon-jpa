@@ -7,16 +7,18 @@ import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAUpdateClause;
 import io.github.xezzon.tao.retrieval.CommonQuery;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import jakarta.annotation.Resource;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.Id;
 import org.hibernate.AnnotationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.reflect.Field;
+import java.util.Arrays;
 
 /**
  * @author xezzon
@@ -28,17 +30,25 @@ public abstract class BaseJpaWrapper<
     >
     implements JpaWrapper<T, M> {
 
-  protected final transient M dao;
-  @Resource
-  protected transient JPAQueryFactory queryFactory;
+  private final transient M repository;
+  private transient JPAQueryFactory queryFactory;
 
-  protected BaseJpaWrapper(M dao) {
-    this.dao = dao;
+  protected BaseJpaWrapper(M repository) {
+    this.repository = repository;
+  }
+
+  protected JPAQueryFactory getQueryFactory() {
+    return this.queryFactory;
+  }
+
+  @Autowired
+  private void setQueryFactory(EntityManager em) {
+    this.queryFactory = new JPAQueryFactory(em);
   }
 
   @Override
   public M get() {
-    return this.dao;
+    return this.repository;
   }
 
   /**
@@ -66,7 +76,7 @@ public abstract class BaseJpaWrapper<
   @Transactional(rollbackFor = {Exception.class})
   public boolean update(T t) {
     JPAUpdateClause clause =
-        JpaUtil.getUpdateClause(t, queryFactory, this.getQuery());
+        JpaUtil.getUpdateClause(t, getQueryFactory(), this.getQuery());
     Field idField = Arrays.stream(this.getBeanClass().getDeclaredFields())
         .filter(field -> field.isAnnotationPresent(Id.class))
         .findAny()
