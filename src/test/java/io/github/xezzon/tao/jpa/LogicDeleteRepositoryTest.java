@@ -4,13 +4,12 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,6 +20,10 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author xezzon
@@ -54,24 +57,20 @@ class LogicDeleteRepositoryTest {
 
 @Getter
 @Setter
+@Accessors(chain = true)
 @ToString
 @Entity
 @Table
-class Dict extends BaseEntity {
+class Dict extends BaseEntity<String> {
 
   @Serial
   private static final long serialVersionUID = 5254551771226841499L;
 
+  @Id
   @Column
   private String id;
   @Column
   private String name;
-
-  @Override
-  public Dict setId(String id) {
-    this.id = id;
-    return this;
-  }
 }
 
 @Component
